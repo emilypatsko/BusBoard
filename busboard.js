@@ -141,24 +141,3 @@ const prompt = require('prompt-sync')();
 const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
 busBoard();
-
-// const prompt = require('prompt-sync')();
-// const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
-
-// var postcode = getPostcode();
-// getLatLong(postcode);
-
-// var postcodeRequest = new XMLHttpRequest();
-// var postcodeUrl = `http://api.postcodes.io/postcodes/${postcode}`
-
-// // use api.postcodes.io to get latitude and longitude
-// postcodeRequest.open('GET', postcodeUrl, true);
-// postcodeRequest.onload = function () {
-//     const postcodeResponse = JSON.parse(postcodeRequest.responseText);
-//     const location = extractLatLong(postcodeResponse);
-
-//     // use transport api to look up 2 nearest bus stops
-//     findNearestStops(location, 2);
-// }
-
-// postcodeRequest.send();
