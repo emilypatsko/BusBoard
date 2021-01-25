@@ -58,12 +58,27 @@ function printDepartureBoard(atcocode) {
     request.send();
 }
 
+const postcodeExpr = /^([A-PR-UWYZ]([0-9]{1,2}|([A-HK-Y][0-9]|[A-HK-Y][0-9]([0-9]|[ABEHMNPRV-Y]))|[0-9][A-HJKS-UW])\ [0-9][ABD-HJLNP-UW-Z]{2}|(GIR\ 0AA)|(SAN\ TA1)|(BFPO\ (C\/O\ )?[0-9]{1,4})|((ASCN|BBND|[BFS]IQQ|PCRN|STHL|TDCU|TKCA)\ 1ZZ))$/i;
 const prompt = require('prompt-sync')();
 const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
 // Get user to supply postcode
-const postcode = prompt('Please enter a postcode: ');
-// should put some error catching in here to make sure postcode is valid
+var postcode; 
+// = prompt('Please enter a postcode: ');
+
+while (!postcodeExpr.test(postcode)) {
+    try {
+        postcode = prompt("Please enter a postcode: ")
+        if (!postcodeExpr.test(postcode)) {
+            throw 'Invalid postcode'
+        }
+    }
+    catch (err)
+    {
+        postcode = null;
+        console.log("Invalid postcode. Please try again. Postcodes must have a space in them.");
+    }
+}
 
 var postcodeRequest = new XMLHttpRequest();
 var postcodeUrl = 'http://api.postcodes.io/postcodes/' + postcode;
