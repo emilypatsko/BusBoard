@@ -77,7 +77,22 @@ function findNearestStops(location, num) {
 }
 
 function printNearestStops(stops) {
-    stops.forEach(stop => printDepartureBoard);
+    stops.forEach(stop => printDepartureBoard(stop));
+}
+
+function checkPostcodeValid(postcode) {
+    var validRequest = new XMLHttpRequest();
+    var validUrl = `http://api.postcodes.io/postcodes/${postcode}/validate`;
+    validRequest.open('GET', validUrl, true);
+    validRequest.onload = function () {
+        var response = JSON.parse(validRequest.responseText);
+        var result = response.result;
+        
+        if (!result) {
+            throw 'Invalid postcode';
+        } 
+    }
+    validRequest.send();
 }
 
 const postcodeExpr = /^([A-PR-UWYZ]([0-9]{1,2}|([A-HK-Y][0-9]|[A-HK-Y][0-9]([0-9]|[ABEHMNPRV-Y]))|[0-9][A-HJKS-UW])\ [0-9][ABD-HJLNP-UW-Z]{2}|(GIR\ 0AA)|(SAN\ TA1)|(BFPO\ (C\/O\ )?[0-9]{1,4})|((ASCN|BBND|[BFS]IQQ|PCRN|STHL|TDCU|TKCA)\ 1ZZ))$/i;
@@ -93,8 +108,10 @@ var postcode;
 
         // also do a get request to check validity
         if (!postcodeExpr.test(postcode)) {
-            throw 'Invalid postcode'
-        }
+            throw 'Invalid postcode format';
+        } else {
+            checkPostcodeValid(postcode);
+        }      
     }
     catch (err)
     {
