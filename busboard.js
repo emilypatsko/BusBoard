@@ -3,10 +3,6 @@ function printDepartureInfo(departure) {
     console.log(arr.join(' '));
 }
 
-function extractDepartureInfo(departure) {
-
-}
-
 function extractLatLong(info) {
     return {
         'postcodeLat': info.result.latitude,
