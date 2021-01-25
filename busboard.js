@@ -1,13 +1,6 @@
 function printDepartureInfo(departure) {
-    let arr = [departure.line, departure.aimed_departure_time, "Expected:", departure.expected_departure_time, departure.direction];
-    console.log(arr.join(' '));
-}
-
-function extractLatLong(info) {
-    return {
-        'postcodeLat': info.result.latitude,
-        'postcodeLong': info.result.longitude
-    }
+    let arr = [`Route: ${departure.line}`, `Scheduled: ${departure.aimed_departure_time}`, `Expected: ${departure.expected_departure_time}  `, `Direction: ${departure.direction}`];
+    console.log(arr.join('\t'));
 }
 
 function printDepartureBoard(atcocode) {
@@ -48,10 +41,14 @@ function printDepartureBoard(atcocode) {
 
         console.log('\n');
         console.log(response.name);
-        let i = 0;
-        while (i < departureBoard.length && i < 5) {
-            printDepartureInfo(departureBoard[i]);
-            i++;
+        if (departureBoard.length == 0) {
+            console.log('No upcoming departures');
+        } else {
+            let i = 0;
+            while (i < departureBoard.length && i < 5) {
+                printDepartureInfo(departureBoard[i]);
+                i++;
+            }
         }
     }
 
@@ -95,23 +92,19 @@ function checkPostcodeValid(postcode) {
     validRequest.send();
 }
 
-const postcodeExpr = /^([A-PR-UWYZ]([0-9]{1,2}|([A-HK-Y][0-9]|[A-HK-Y][0-9]([0-9]|[ABEHMNPRV-Y]))|[0-9][A-HJKS-UW])\ [0-9][ABD-HJLNP-UW-Z]{2}|(GIR\ 0AA)|(SAN\ TA1)|(BFPO\ (C\/O\ )?[0-9]{1,4})|((ASCN|BBND|[BFS]IQQ|PCRN|STHL|TDCU|TKCA)\ 1ZZ))$/i;
-const prompt = require('prompt-sync')();
-const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
-
-// Get user to supply postcode
-var postcode; 
-
-// while (!postcodeExpr.test(postcode)) {
+function getPostcode() {
+    const postcodeExpr = /^([A-PR-UWYZ]([0-9]{1,2}|([A-HK-Y][0-9]|[A-HK-Y][0-9]([0-9]|[ABEHMNPRV-Y]))|[0-9][A-HJKS-UW])\ [0-9][ABD-HJLNP-UW-Z]{2}|(GIR\ 0AA)|(SAN\ TA1)|(BFPO\ (C\/O\ )?[0-9]{1,4})|((ASCN|BBND|[BFS]IQQ|PCRN|STHL|TDCU|TKCA)\ 1ZZ))$/i;
+    var postcode;
     try {
         postcode = prompt("Please enter a postcode: ")
-
+        
         // also do a get request to check validity
         if (!postcodeExpr.test(postcode)) {
             throw 'Invalid postcode format';
         } else {
             checkPostcodeValid(postcode);
-        }      
+        }   
+        return postcode;   
     }
     catch (err)
     {
@@ -119,19 +112,53 @@ var postcode;
         console.log("Invalid postcode. Please try again. Postcodes must have a space in them.");
         throw err;
     }
-// }
-
-var postcodeRequest = new XMLHttpRequest();
-var postcodeUrl = 'http://api.postcodes.io/postcodes/' + postcode;
-
-// use api.postcodes.io to get latitude and longitude
-postcodeRequest.open('GET', postcodeUrl, true);
-postcodeRequest.onload = function () {
-    const postcodeResponse = JSON.parse(postcodeRequest.responseText);
-    const location = extractLatLong(postcodeResponse);
-
-    // use transport api to look up 2 nearest bus stops
-    findNearestStops(location, 2);
 }
 
-postcodeRequest.send();
+function getLatLong(postcode) {
+    var postcodeRequest = new XMLHttpRequest();
+    var postcodeUrl = `http://api.postcodes.io/postcodes/${postcode}`
+
+    // use api.postcodes.io to get latitude and longitude
+    postcodeRequest.open('GET', postcodeUrl, true);
+    postcodeRequest.onload = function () {
+        const postcodeResponse = JSON.parse(postcodeRequest.responseText);
+        const location = {'postcodeLat': postcodeResponse.result.latitude, 'postcodeLong': postcodeResponse.result.longitude};
+        // const location = extractLatLong(postcodeResponse);
+
+        // use transport api to look up 2 nearest bus stops
+        findNearestStops(location, 2);
+    }
+
+    postcodeRequest.send();
+}
+
+function busBoard() {
+    var postcode = getPostcode();
+    getLatLong(postcode);
+}
+
+const prompt = require('prompt-sync')();
+const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+
+busBoard();
+
+// const prompt = require('prompt-sync')();
+// const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+
+// var postcode = getPostcode();
+// getLatLong(postcode);
+
+// var postcodeRequest = new XMLHttpRequest();
+// var postcodeUrl = `http://api.postcodes.io/postcodes/${postcode}`
+
+// // use api.postcodes.io to get latitude and longitude
+// postcodeRequest.open('GET', postcodeUrl, true);
+// postcodeRequest.onload = function () {
+//     const postcodeResponse = JSON.parse(postcodeRequest.responseText);
+//     const location = extractLatLong(postcodeResponse);
+
+//     // use transport api to look up 2 nearest bus stops
+//     findNearestStops(location, 2);
+// }
+
+// postcodeRequest.send();
